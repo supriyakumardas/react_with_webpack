@@ -23,7 +23,6 @@ const Otp = () => {
 
     const [mobile , setMobile] = useState("");
     const [otp , setOTP] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
     const [isError, setIsError] = useState(false);
     const [isOTP, setIsOTP] = useState(false);
 
@@ -103,27 +102,21 @@ const Otp = () => {
 
       renderRecaptchaVerifier();
 
-      const phoneNumber = "+918328980499";
+      const phoneNumber = `+91${mobile}`;
 
       const appVerifier = window.recaptchaVerifier;
-      try{
-        const res = await signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-        console.error(" sending OTP: ", res);
-
-      }catch(error){
-        console.error("Error sending OTP: ", error);
-
-      }
-      // signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-      //     .then((confirmationResult) => {
-      //         window.confirmationResult = confirmationResult;
-      //         console.log("OTP sent: ", confirmationResult);
-      //         setIsSent(true);
-      //         setIsGenerate(true);
-      //     })
-      //     .catch((error) => {
-      //         console.error("Error sending OTP: ", error);
-      //     });
+      
+      signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+          .then((confirmationResult) => {
+              window.confirmationResult = confirmationResult;
+              console.log("OTP sent: ", confirmationResult);
+              setIsSent(true);
+              setIsGenerate(true);
+          })
+          .catch((error) => {
+              console.error("Error sending OTP: ", error);
+              showErrorMessage(error)
+          });
   };
 
   const otpVerification = async () => {
@@ -134,18 +127,17 @@ const Otp = () => {
 
       try {
           const confirmationResult = window.confirmationResult;
-          await confirmationResult.confirm(otp); // Verify OTP
-          console.log("OTP verified!");
-          navigate('/home'); // Navigate to home on successful verification
+          await confirmationResult.confirm(otp); 
+          showSuccessMessage("Login successful.")
+          navigate(path.home); 
       } catch (error) {
           console.error("OTP verification failed: ", error);
+          showErrorMessage(error)
       }
   };
 
   
-    const passwordHandler=()=>{
-      setShowPassword(!showPassword)
-    }
+   
    
 
   return (
