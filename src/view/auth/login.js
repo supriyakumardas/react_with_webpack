@@ -85,7 +85,7 @@ const Login = () => {
       <div style={{ width:windowWidth, height: windowHeight }} className="row-center">
         <div
           style={{
-            height: (windowHeight * 2) / 3,
+            height: 600,
             width:windowWidth < 1500? (windowWidth * 1.2) / 1.5 : (windowWidth * 1.2) / 2,
             backgroundColor: '#fff',
             boxShadow: '5px 1px 15px 0 gray',

@@ -5,6 +5,11 @@ import { showErrorMessage, showSuccessMessage } from '../../constants/alertMessa
 import { Puff } from 'react-loader-spinner'
 import { path } from '../../constants/path';
 import { Button, Input } from 'antd';
+import { RecaptchaVerifier,signInWithPhoneNumber } from "firebase/auth";
+import { auth } from '../../config/firebase.config';
+
+
+
 
 
 const Otp = () => {
@@ -18,12 +23,14 @@ const Otp = () => {
 
     const [mobile , setMobile] = useState("");
     const [otp , setOTP] = useState("");
-
     const [showPassword, setShowPassword] = useState(false);
     const [isError, setIsError] = useState(false);
     const [isOTP, setIsOTP] = useState(false);
 
     const [loader, setLoader] = useState(false);
+
+
+  
 
     useEffect(() => {
         if(isSent){
@@ -71,39 +78,70 @@ const Otp = () => {
       setOTP("");
     }
 
-    const otpVerification=async()=>{
-      try {
-        if(!otp || otp.length !==6){
+   
+
+    const renderRecaptchaVerifier = () => {
+      if (!window.recaptchaVerifier) {
+          window.recaptchaVerifier = new RecaptchaVerifier( auth,'recaptcha-container', {
+              'size': 'normal',
+              'callback': (response) => {
+                  console.log("Captcha verified:", response);
+                  otpGenerateHandler();  // Proceed with OTP generation after reCAPTCHA verification
+              },
+              'expired-callback': () => {
+                  console.log("Captcha expired. Please retry.");
+              }
+          },);
+      }
+  };
+
+  const otpGenerateHandler =async () => {
+      if (!mobile || mobile.length !== 10) {
+          setIsError(true);
+          return;
+      }      
+
+      renderRecaptchaVerifier();
+
+      const phoneNumber = "+918328980499";
+
+      const appVerifier = window.recaptchaVerifier;
+      try{
+        const res = await signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+        console.error(" sending OTP: ", res);
+
+      }catch(error){
+        console.error("Error sending OTP: ", error);
+
+      }
+      // signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+      //     .then((confirmationResult) => {
+      //         window.confirmationResult = confirmationResult;
+      //         console.log("OTP sent: ", confirmationResult);
+      //         setIsSent(true);
+      //         setIsGenerate(true);
+      //     })
+      //     .catch((error) => {
+      //         console.error("Error sending OTP: ", error);
+      //     });
+  };
+
+  const otpVerification = async () => {
+      if (!otp || otp.length !== 6) {
           setIsOTP(true);
           return;
-        }
-        navigate(path.home);
-      } catch (error) {
-        showErrorMessage(error.response.data.message)
-        setLoader(false)
       }
-    }
-  
-    const otpGenerateHandler = async () => {
+
       try {
-
-        if (!mobile || mobile.length !== 10) {
-          setIsError(true)
-          return;
-        }
-      
-        const payload = {}
-        payload.mobile = mobile;
-  
-
-        setIsSent(!isSent)
-        setIsGenerate(true);
+          const confirmationResult = window.confirmationResult;
+          await confirmationResult.confirm(otp); // Verify OTP
+          console.log("OTP verified!");
+          navigate('/home'); // Navigate to home on successful verification
       } catch (error) {
-        console.log(error);
-        showErrorMessage(error.response.data.message)
-        setLoader(false)
+          console.error("OTP verification failed: ", error);
       }
-    };
+  };
+
   
     const passwordHandler=()=>{
       setShowPassword(!showPassword)
@@ -111,11 +149,13 @@ const Otp = () => {
    
 
   return (
-    <>
-      <div style={{ width:windowWidth, height: windowHeight }} className="row-center">
+    
+    <div>
+    <div id="recaptcha-container"></div>
+    <div style={{ width:windowWidth, height: windowHeight }} className="row-center">
         <div
           style={{
-            height: (windowHeight * 2) / 3,
+            height: 600,
             width:windowWidth < 1500? (windowWidth * 1.2) / 1.5 : (windowWidth * 1.2) / 2,
             backgroundColor: '#fff',
             boxShadow: '5px 1px 15px 0 gray',
@@ -128,7 +168,7 @@ const Otp = () => {
             <img
               src={require('../../assets/images/icons/otp.jpeg')}
               style={{
-                height: '80%',
+                height: '70%',
                 width: '90%',
                 borderRadius: '10px',
                 objectFit: 'cover',
@@ -234,7 +274,8 @@ const Otp = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
+    
   );
 };
 

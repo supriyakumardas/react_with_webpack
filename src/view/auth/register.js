@@ -7,6 +7,8 @@ import { showErrorMessage, showSuccessMessage } from '../../constants/alertMessa
 import { Puff } from 'react-loader-spinner'
 import { path } from '../../constants/path';
 import { Button, Input } from 'antd';
+import * as EmailValidator from 'email-validator';
+
 
 
 const Register = () => {
@@ -52,7 +54,7 @@ const Register = () => {
           setIsError(true)
           return;
         }
-        if (!email || email.trim() === "") {
+        if (!email || !EmailValidator.validate(email)) {
           setIsError(true)
           return;
         }
@@ -111,7 +113,7 @@ const Register = () => {
       <div style={{ width:windowWidth, height: windowHeight }} className="row-center">
         <div
           style={{
-            height: (windowHeight * 2) / 3,
+            height:600,
             width:windowWidth < 1500? (windowWidth * 1.2) / 1.5 : (windowWidth * 1.2) / 2,
             backgroundColor: '#fff',
             boxShadow: '5px 1px 15px 0 gray',
@@ -132,7 +134,7 @@ const Register = () => {
             />
           </div>
           <div style={{ width: '50%', height: '100%' }}>
-            <div style={{ height: '25%', width: '100%' }} className="row-bottom">
+            <div style={{ height: '20%', width: '100%' }} className="row-bottom">
               <div style={{ width: '33%', height: '70%' }}>
                 <img
                   src={require('../../assets/images/logo/LOGO.png')}
@@ -176,7 +178,7 @@ const Register = () => {
                   />
 
                   {
-                    isError && (!email || email.trim() === "") ?
+                    isError && (!email || !EmailValidator.validate(email)) ?
                       <div className="error-text">{error.email}</div> :
                       null
                   }

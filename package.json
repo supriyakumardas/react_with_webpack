@@ -12,6 +12,8 @@
   "description": "",
   "dependencies": {
     "antd": "^5.20.6",
+    "email-validator": "^2.0.4",
+    "firebase": "^10.13.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-loader-spinner": "^6.1.6",
