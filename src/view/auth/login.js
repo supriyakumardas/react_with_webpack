@@ -5,6 +5,8 @@ import { showErrorMessage, showSuccessMessage } from '../../constants/alertMessa
 import { Puff } from 'react-loader-spinner'
 import { path } from '../../constants/path';
 import { Button, Input } from 'antd';
+import authService from '../../service/authService';
+
 
 
 const Login = () => {
@@ -53,19 +55,18 @@ const Login = () => {
 
         console.log(payload)
   
-        // const res = await authService.login(payload);
+        const res = await authService.userLogin(payload);
   
-        // if (res.status === 200) {
-        //   localStorage.setItem("token", res.data.token);
-        //   localStorage.setItem('user', JSON.stringify(res.data.userData));
-        //   showSuccessMessage(res.data.message)
-        //   setTimeout(() => {
-        //     navigate('/app');
-        //     clearFields();
-        //     setLoader(false)
-        //   }, 1500);
+        if (res.status === 200) {
+          localStorage.setItem('userId', res.data.userId);
+          showSuccessMessage(res.data.message)
+          setTimeout(() => {
+            navigate(path.home);
+            clearFields();
+            setLoader(false)
+          }, 1000);
   
-        // }
+        }
         setLoader(false)
 
       } catch (error) {

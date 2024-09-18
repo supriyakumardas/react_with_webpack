@@ -141,6 +141,7 @@
   word-wrap: break-word; /* Break long words */
   overflow-wrap: break-word; /* Additional support for wrapping */
   white-space: normal; /* Ensure normal text wrapping */
+  text-transform: uppercase;
 }
 
 .details-container {

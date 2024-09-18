@@ -8,7 +8,7 @@ import { Puff } from 'react-loader-spinner'
 import { path } from '../../constants/path';
 import { Button, Input } from 'antd';
 import * as EmailValidator from 'email-validator';
-
+import authService from '../../service/authService';
 
 
 const Register = () => {
@@ -79,19 +79,18 @@ const Register = () => {
 
         console.log(payload)
   
-        // const res = await authService.login(payload);
+        const res = await authService.userRegistration(payload);
   
-        // if (res.status === 200) {
-        //   localStorage.setItem("token", res.data.token);
-        //   localStorage.setItem('user', JSON.stringify(res.data.userData));
-        //   showSuccessMessage(res.data.message)
-        //   setTimeout(() => {
-        //     navigate('/app');
-        //     clearFields();
-        //     setLoader(false)
-        //   }, 1500);
+        if (res.status === 201) {
+          // localStorage.setItem('user', JSON.stringify(res.data.userData));
+          showSuccessMessage(res.data.message)
+          setTimeout(() => {
+            navigate(path.login);
+            clearFields();
+            setLoader(false)
+          }, 1000);
   
-        // }
+        }
   
       } catch (error) {
         console.log(error);

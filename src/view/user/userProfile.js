@@ -1,8 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from 'antd';
-
+import userService from '../../service/userService';
+import { showErrorMessage } from '../../constants/alertMessages';
 
 const UserProfile = () => {
+
+  const [userData , setUserData ] = useState({});
+
+  const getUserData=async()=>{
+    try {
+      const userId = localStorage.getItem("userId");
+console.log(userId)
+      const res = await userService.userDetails(userId.toString());
+
+      if(res.status === 200){
+        setUserData(res.data.data)
+      }
+    } catch (error) {
+      showErrorMessage(error)
+    }
+  }
+
+  
+useEffect(()=>{
+  getUserData();
+},[])
 
   return (
     <div style={{ padding: '180px' }} className="row-center">
@@ -14,7 +36,7 @@ const UserProfile = () => {
   </div>
   <div className='name-container'>
     <div className='name-text'>
-      Supriya Kumar Das 
+     {userData?.name}
     </div>
   </div>
   <div className='details-container'>
@@ -23,7 +45,7 @@ const UserProfile = () => {
         <span>Email</span> <span style={{ paddingRight: 1 }}>:</span>
       </div>
       <div className='card-des'>
-        <span style={{ paddingLeft: 1 }}>supriyakumardas71@gmail.com </span>
+        <span style={{ paddingLeft: 1 }}>{userData?.email} </span>
       </div>
     </div>
     <div className='prop-value'>
@@ -31,7 +53,7 @@ const UserProfile = () => {
         <span>Mobile</span> <span style={{ paddingRight: 1 }}>:</span>
       </div>
       <div className='card-des'>
-        <span style={{ paddingLeft: 1 }}>+91</span><span> 8093291779</span>
+        <span style={{ paddingLeft: 1 }}>+91</span><span>{userData?.mobile}</span>
       </div>
     </div>
   </div>
