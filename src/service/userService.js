@@ -6,8 +6,12 @@ import { url } from "../api/apiConstants";
 
 const userDetails =(id)=>{
     const apiUrl = baseurl+url.userDetails+id
-    console.log(apiUrl)
     return axios.get(apiUrl);
 }
 
-export default {userDetails};
+const userByMobile =(mobile)=>{
+    const apiUrl = baseurl+url.userByMobile+mobile
+    return axios.get(apiUrl);
+}
+
+export default {userDetails,userByMobile};

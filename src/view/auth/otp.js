@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { error } from '../../constants/errorText';
 import { showErrorMessage, showSuccessMessage } from '../../constants/alertMessages';
-import { Puff } from 'react-loader-spinner'
 import { path } from '../../constants/path';
 import { Button, Input } from 'antd';
 import { RecaptchaVerifier,signInWithPhoneNumber } from "firebase/auth";
 import { auth } from '../../config/firebase.config';
-
+import userService from '../../service/userService';
 
 
 
@@ -28,7 +27,7 @@ const Otp = () => {
 
     const [loader, setLoader] = useState(false);
 
-
+  
   
 
     useEffect(() => {
@@ -72,20 +71,17 @@ const Otp = () => {
         return ()=> removeEventListener('resize',handleSize)
     },[windowWidth])
   
-    const clearFields = () => {
-      setMobile("");
-      setOTP("");
-    }
+   
 
    
 
     const renderRecaptchaVerifier = () => {
       if (!window.recaptchaVerifier) {
           window.recaptchaVerifier = new RecaptchaVerifier( auth,'recaptcha-container', {
-              'size': 'normal',
+              'size': 'invisible',
               'callback': (response) => {
                   console.log("Captcha verified:", response);
-                  otpGenerateHandler();  // Proceed with OTP generation after reCAPTCHA verification
+                  otpGenerateHandler();
               },
               'expired-callback': () => {
                   console.log("Captcha expired. Please retry.");
@@ -95,28 +91,44 @@ const Otp = () => {
   };
 
   const otpGenerateHandler =async () => {
+
+    try {
       if (!mobile || mobile.length !== 10) {
-          setIsError(true);
-          return;
-      }      
+        setIsError(true);
+        return;
+    }      
+     const user = await userService.userByMobile(mobile);
+     
+     if(user.status === 200){
 
       renderRecaptchaVerifier();
 
       const phoneNumber = `+91${mobile}`;
-
+  
       const appVerifier = window.recaptchaVerifier;
-      
+     
       signInWithPhoneNumber(auth, phoneNumber, appVerifier)
           .then((confirmationResult) => {
               window.confirmationResult = confirmationResult;
               console.log("OTP sent: ", confirmationResult);
               setIsSent(true);
               setIsGenerate(true);
+              showSuccessMessage("OTP has been sent successfully.")
           })
           .catch((error) => {
               console.error("Error sending OTP: ", error);
-              showErrorMessage(error)
+              showErrorMessage(error.message)
+              setTimeout(()=>{
+                navigate(path.login)
+              },500)
           });
+     }
+    
+  
+    } catch (error) {
+      showErrorMessage(error.response.data.message)
+    }
+     
   };
 
   const otpVerification = async () => {
@@ -132,8 +144,8 @@ const Otp = () => {
           navigate(path.home); 
       } catch (error) {
           console.error("OTP verification failed: ", error);
-          showErrorMessage(error)
-      }
+          showErrorMessage(error.message)
+        }
   };
 
   
@@ -241,23 +253,14 @@ const Otp = () => {
                   }
                  
                   }>
-                  {loader ?
-                    <div className='row-center'>
-                      <Puff
-                        visible={true}
-                        height="25"
-                        width="25"
-                        color="#fff"
-                        ariaLabel="puff-loading"
-                      />
-                    </div> :(
+                  {
                      isSent ? 
                      "Verify OTP":
-                    "Generate OTP")}
+                    "Generate OTP"}
                 </Button>
 {
   isGenerate?
-  <p>{timeLeft === 0 ? <Link style={{textDecoration:"none"}} to="" onClick={()=>{setTimeLeft(60);setTimeout(()=>setIsSent(true),100);}} >Resend OTP</Link>  :"Resend OTP in " + formatTime(timeLeft) +" min."}</p>
+  <p>{timeLeft === 0 ? <Link style={{textDecoration:"none"}} to="" onClick={()=>{setTimeLeft(60);setTimeout(()=>setIsSent(true),100);otpGenerateHandler()}} >Resend OTP</Link>  :"Resend OTP in " + formatTime(timeLeft) +" min."}</p>
 :null
 }
               
